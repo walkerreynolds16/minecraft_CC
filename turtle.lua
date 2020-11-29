@@ -442,26 +442,26 @@ end
 
 
 
-if turtle.getFuelLevel() == 0 then refuelTurtle(1) end
+-- if turtle.getFuelLevel() == 0 then refuelTurtle(1) end
 
-currOrientation = getOrientation()
+-- currOrientation = getOrientation()
 
-local gpsX, gpsY, gpsZ = gps.locate(2)
-local start = {
-    x = 2413,
-    y = gpsY,
-    z = 1584
-}
+-- local gpsX, gpsY, gpsZ = gps.locate(2)
+-- local start = {
+--     x = 2413,
+--     y = gpsY,
+--     z = 1584
+-- }
 
-local delta = {
-    x = 20,
-    y = 5,
-    z = 20
-}
+-- local delta = {
+--     x = 20,
+--     y = 5,
+--     z = 20
+-- }
 
 
 
-digAreaFill(start, delta)
+-- digAreaFill(start, delta)
 
 -- print("going to start strip location")
 -- goTo(start.x, start.y, start.z)
@@ -474,3 +474,17 @@ digAreaFill(start, delta)
 -- -- Finally, go back to where it started
 -- print("going to beginning location")
 -- goTo(curX, curY, curZ)
+
+
+local modem = peripheral.wrap("left")
+
+modem.open(2)
+
+local event, modemSide, senderChannel, 
+  replyChannel, message, senderDistance = os.pullEvent("modem_message")
+
+print("I just received a message on channel: "..senderChannel)
+print("I should apparently reply on channel: "..replyChannel)
+print("The modem receiving this is located on my "..modemSide.." side")
+print("The message was: "..message)
+print("The sender is: "..(senderDistance or "an unknown number of").." blocks away from me.")
