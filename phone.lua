@@ -6,13 +6,12 @@ local modem = peripheral.wrap("back")
 modem.open(PHONE_CHANNEL)
 
 -- program params
--- Area fill dig -> areaFill <numOfTurtles> <deltaX> <deltaY> <deltaZ>
--- Strip Mine dig -> stripMine <numOfTurtles> <numOfTunnels> <tunnelLength> <tunnelHeight>
+-- Area fill dig -> areaFill <deltaX> <deltaY> <deltaZ>
+-- Strip Mine dig -> stripMine <numOfTunnels> <tunnelLength> <tunnelHeight>
 
 local miningType = arg[1]
-local numOfTurtles = arg[2]
 
-if not miningType or not numOfTurtles then 
+if not miningType then 
     -- Program didn't have proper params
     print("Program wasn't given proper params...")
     sleep(3)
@@ -22,19 +21,19 @@ end
 local gpsX, gpsY, gpsZ = gps.locate(2)
 
 if miningType == "areaFill" then
-    print("DeltaX = ", arg[3])
-    print("DeltaY = ", arg[4])
-    print("DeltaZ = ", arg[5])
-    local commandString = string.format("%s,%s,%s,%s,%s,%s,%s,%s", miningType, numOfTurtles, math.floor(gpsX), math.floor(gpsY), math.floor(gpsZ), arg[3], arg[4], arg[5])
+    print("DeltaX = ", arg[2])
+    print("DeltaY = ", arg[3])
+    print("DeltaZ = ", arg[4])
+    local commandString = string.format("%s,%s,%s,%s,%s,%s,%s", miningType, math.floor(gpsX), math.floor(gpsY), math.floor(gpsZ), arg[2], arg[3], arg[4])
 
     modem.transmit(SERVER_CHANNEL, PHONE_CHANNEL, commandString)
 
 elseif miningType == "stripMine" then
-    print("numOfTunnels = ", arg[3])
-    print("tunnelLength = ", arg[4])
-    print("tunnelHeight = ", arg[5])
+    print("numOfTunnels = ", arg[2])
+    print("tunnelLength = ", arg[3])
+    print("tunnelHeight = ", arg[4])
 
-    local commandString = string.format("%s,%s,%s,%s,%s,%s,%s,%s", miningType, numOfTurtles, gpsX, gpsY, gpsZ, arg[3], arg[4], arg[5])
+    local commandString = string.format("%s,%s,%s,%s,%s,%s,%s", miningType, gpsX, gpsY, gpsZ, arg[2], arg[3], arg[4])
 
     modem.transmit(SERVER_CHANNEL, PHONE_CHANNEL, commandString)
 

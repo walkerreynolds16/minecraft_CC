@@ -1,5 +1,10 @@
 -- This script will run on the turtle that creates the turtles for deployment
+local SERVER_CHANNEL = 1
+local TURTLE_CHANNEL = 2
 local TURTLE_CREATOR_CHANNEL = 3
+local PHONE_CHANNEL = 4
+
+local ITEM_SLOTS = 16
 
 local modem = peripheral.wrap("left")
 
@@ -41,7 +46,9 @@ function checkIfCanCreateTurtle()
 
 end
 
-function createTurtle() 
+function placeTurtle() 
+    if not checkIfCanCreateTurtle() then print("can't make turtle, sorry uWu") return end
+
     turtle.place()
 end
 
@@ -79,15 +86,48 @@ function decodeMessage(message)
 end
 
 
+function getAvailableTurtleCount()
+    local turtleCount = 0
+    for i = 1, ITEM_SLOTS, 1 do
+        local itemData = turtle.getItemDetail(i)
+
+        if itemData and (itemData.name == "computercraft:turtle_expanded") then
+            turtleCount = turtleCount + itemData.count
+        end
+    end
+
+    return turtleCount
+end
+
+function handleServerEvent(message)
+    local messageSplit = split(message)
+
+    if messageSplit[1] == "getTurtleCount" then
+        local count = getAvailableTurtleCount()
+        print("available count = ", count)
+        local commandString = string.format("%s,%s", "numTurtleResponse", count)
+        modem.transmit(SERVER_CHANNEL, TURTLE_CREATOR_CHANNEL, commandString)
+
+    elseif messageSplit[1] == "placeTurtle" then
+        placeTurtle()
+    else
+        print("event type was not a proper value...")
+    end
+end
 
 
-local event, modemSide, senderChannel, 
-  replyChannel, message, senderDistance = os.pullEvent("modem_message")
+while true do
+    print("looking for events...")
+    local event, modemSide, senderChannel, 
+        replyChannel, message, senderDistance = os.pullEvent("modem_message")
 
--- print("I just received a message on channel: "..senderChannel)
--- print("I should apparently reply on channel: "..replyChannel)
--- print("The modem receiving this is located on my "..modemSide.." side")
--- print("The message was: "..message)
--- print("The sender is: "..(senderDistance or "an unknown number of").." blocks away from me.")
+    print("Received message from channel ", replyChannel)
 
-decodeMessage(message)
+    if replyChannel == SERVER_CHANNEL then handleServerEvent(message)
+    else
+        print("Received unrecognizable event from channel ", replyChannel)
+        print("Received message = ", message)
+    end
+end
+
+-- decodeMessage(message)

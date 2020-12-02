@@ -5,6 +5,11 @@ local NEGATIVE_Z_ORIENTATION = 2
 local POSITIVE_X_ORIENTATION = 3
 local POSITIVE_Z_ORIENTATION = 4
 
+local SERVER_CHANNEL = 1
+local TURTLE_CHANNEL = 2
+local TURTLE_CREATOR_CHANNEL = 3
+local PHONE_CHANNEL = 4
+
 local currOrientation = nil
 
 local fuelSources = {
@@ -32,6 +37,17 @@ function ternary(cond, T, F)
     else
         return F
     end
+end
+
+function split (inputstr, sep)
+    if sep == nil then
+            sep = "%s"
+    end
+    local t={}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+            table.insert(t, str)
+    end
+    return t
 end
 
 function findItemInInventory(itemName)
@@ -447,44 +463,41 @@ end
 -- currOrientation = getOrientation()
 
 -- local gpsX, gpsY, gpsZ = gps.locate(2)
--- local start = {
---     x = 2413,
---     y = gpsY,
---     z = 1584
--- }
-
--- local delta = {
---     x = 20,
---     y = 5,
---     z = 20
--- }
-
-
-
--- digAreaFill(start, delta)
-
--- print("going to start strip location")
--- goTo(start.x, start.y, start.z)
-
--- for i = 1, 10, 1 do
---     digStripMine(start, 50, 4)
---     start.z = start.z + 3 
--- end
-
--- -- Finally, go back to where it started
--- print("going to beginning location")
--- goTo(curX, curY, curZ)
-
+local start = nil
+local delta = nil
 
 local modem = peripheral.wrap("left")
 
-modem.open(2)
+modem.open(TURTLE_CHANNEL)
+modem.transmit(SERVER_CHANNEL, TURTLE_CHANNEL, "ready")
 
-local event, modemSide, senderChannel, 
-  replyChannel, message, senderDistance = os.pullEvent("modem_message")
+while true do
+    local event, modemSide, senderChannel, 
+        replyChannel, message, senderDistance = os.pullEvent("modem_message")
 
-print("I just received a message on channel: "..senderChannel)
-print("I should apparently reply on channel: "..replyChannel)
-print("The modem receiving this is located on my "..modemSide.." side")
-print("The message was: "..message)
-print("The sender is: "..(senderDistance or "an unknown number of").." blocks away from me.")
+    print("Received message from channel ", replyChannel)
+
+    if replyChannel == SERVER_CHANNEL then
+        local messageSplit = split(message, ',')
+
+        if messageSplit[1] == "start" then
+            local start = {x = messageSplit[2], y = messageSplit[3], z = messageSplit[4]}
+            local delta = {x = messageSplit[5], y = messageSplit[6], z = messageSplit[7]}
+            break
+        end
+
+        print("bad command from server")
+        os.shutdown()
+    else
+        print("Received unrecognizable event from channel ", replyChannel)
+        print("Received message = ", message)
+    end
+end
+
+
+-- TODO move code for running multi turtles to a new turtle file
+-- TODO turtle is gonna just dig through a bunch of shit, maybe make it go up one block or something when it encounters something
+-- TODO get turtle to refuel from below chest, also add functionality for more than one stack of coal
+-- TODO check how to get orientation before/after sending ready command, maybe just set static orientation from start? 
+
+digAreaFill(start, delta)

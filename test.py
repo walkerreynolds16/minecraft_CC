@@ -63,7 +63,7 @@ for i in range(numOfTurtles):
 # print(getFactors(30))
 bestNumOfTurtles = 1
 bestScore = 0
-for i in range(1,65):
+for i in range(1,5):
     sqrt = math.sqrt(i)
     xSections = math.floor(deltas[0] / sqrt)
     zSections = math.floor(deltas[2] / sqrt)
@@ -84,6 +84,8 @@ print("Best NumOfTurtles = {}, Best Score = {}".format(bestNumOfTurtles, bestSco
 sqrt = math.sqrt(bestNumOfTurtles)
 print(math.floor(deltas[0] / sqrt))
 print(math.floor(deltas[2] / sqrt))
+
+
 
 
 
